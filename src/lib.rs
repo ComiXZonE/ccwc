@@ -43,16 +43,28 @@ impl WordCount {
     pub fn number_of_lines(&self) -> usize {
         self.contents.lines().count()
     }
+
+    pub fn number_of_words(&self) -> usize {
+        self.contents.split_whitespace().count()
+    }
+
+    pub fn number_of_chars(&self) -> usize {
+        self.contents.chars().count()
+    }
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let wc = WordCount::build(&config.file_path)?;
 
     match &config.command[..] {
-        "-c" => println!("{}", wc.size_in_bytes()),
-        "-l" => println!("{}", wc.number_of_lines()),
+        "-c" => print!("{} ", wc.size_in_bytes()),
+        "-l" => print!("{} ", wc.number_of_lines()),
+        "-w" => print!("{} ", wc.number_of_words()),
+        "-m" => print!("{} ", wc.number_of_chars()),
         _ => {},
     }
+
+    println!("{}", config.file_path);
 
     Ok(())
 }
