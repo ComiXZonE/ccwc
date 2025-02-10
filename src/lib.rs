@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::fs;
 
 pub struct Config {
     pub file_path: String,
@@ -7,17 +8,51 @@ pub struct Config {
 
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() > 3 {
-            return Err("too many arguments");
-        }
+        let mut file_path = String::from("");
+        let mut command = String::from("");
 
-        let file_path = args[1].clone();
-        let command = args[2].clone();
+        match args.len() {
+            2 => { 
+                file_path = args[1].clone(); 
+            },
+            3 => {
+                command = args[1].clone();
+                file_path = args[2].clone();
+            },
+            _ => return Err("Please specify file path")
+        }
 
         Ok(Config { file_path, command })
     }
 }
 
+pub struct WordCount {
+    pub contents: String,
+}
+
+impl WordCount {
+    pub fn build(file_path: &str) -> Result<WordCount, Box<dyn Error>> {
+        let contents = fs::read_to_string(file_path)?;
+        Ok(WordCount { contents })
+    }
+
+    pub fn size_in_bytes(&self) -> usize {
+        self.contents.len()
+    }
+
+    pub fn number_of_lines(&self) -> usize {
+        self.contents.lines().count()
+    }
+}
+
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let wc = WordCount::build(&config.file_path)?;
+
+    match &config.command[..] {
+        "-c" => println!("{}", wc.size_in_bytes()),
+        "-l" => println!("{}", wc.number_of_lines()),
+        _ => {},
+    }
+
     Ok(())
 }
